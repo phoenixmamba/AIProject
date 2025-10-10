@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- logback默认每60秒扫描该文件一次，如果有变动则用变动后的配置文件。 -->
+<configuration scan="false">
+    <!-- ==============================================开发环境=========================================== -->
+    <springProfile name="dev">
+        <!-- 控制台输出 -->
+        <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+            <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+                <!--格式化输出：%d表示日期，%thread表示线程名，%-5level：级别从左显示5个字符宽度%msg：日志消息，%n是换行符-->
+                <pattern>%d{HH:mm:ss.SSS} [%X{traceId},%X{spanId}] [%thread] %-5level %logger{50} - %msg%n</pattern>
+            </encoder>
+        </appender>
+<!--        &lt;!&ndash; MyBatis日志配置 &ndash;&gt;-->
+<!--        <logger name="com.cuijian.module1.dao" level="DEBUG" additivity="false">-->
+<!--            <appender-ref ref="STDOUT" />-->
+<!--        </logger>-->
+        <!--指定最基础的日志输出级别-->
+        <root level="INFO">
+            <!--appender将会添加到这个loger-->
+            <appender-ref ref="STDOUT"/>
+        </root>
+    </springProfile>
+
+    <!-- ==============================================生产环境=========================================== -->
+    <springProfile name="prod">
+        <!--定义日志文件的存储地址 勿在 LogBack 的配置中使用相对路径-->
+        <property name="LOG_HOME" value="/home/MyProject1/logs/module1"/>
+
+        <!-- 控制台输出 -->
+        <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+            <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+                <!--格式化输出：%d表示日期，%thread表示线程名，%-5level：级别从左显示5个字符宽度%msg：日志消息，%n是换行符-->
+                <pattern>%d{HH:mm:ss.SSS} [%X{traceId},%X{spanId}] [%thread] %-5level %logger{50} - %msg%n</pattern>
+            </encoder>
+        </appender>
+
+        <!-- 异步输出 -->
+        <appender name="async-console" class="ch.qos.logback.classic.AsyncAppender">
+            <!-- 引用同步，将其包装为异步 -->
+            <appender-ref ref="STDOUT" />
+        </appender>
+
+        <!-- 按照每天生成日志文件 -->
+        <appender name="INFO_APPENDER" class="ch.qos.logback.core.rolling.RollingFileAppender">
+
+            <!--日志名称，如果没有File 属性，那么只会使用FileNamePattern的文件路径规则
+            如果同时有<File>和<FileNamePattern>，那么当天日志是<File>，明天会自动把今天
+            的日志改名为今天的日期。即，<File> 的日志都是当天的。
+            -->
+            <file>${LOG_HOME}/info.log</file>
+
+            <!--滚动策略，按照大小时间滚动 SizeAndTimeBasedRollingPolicy-->
+            <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+                <!--日志文件输出的文件名-->
+                <FileNamePattern>${LOG_HOME}/info.%d{yyyy-MM-dd}.%i.log</FileNamePattern>
+                <!--只保留最近30天的日志-->
+                <MaxHistory>30</MaxHistory>
+                <!--用来指定日志文件的上限大小，那么到了这个值，就会删除旧的日志-->
+                <totalSizeCap>1GB</totalSizeCap>
+                <MaxFileSize>10MB</MaxFileSize>
+            </rollingPolicy>
+
+            <!--日志输出编码格式化-->
+            <encoder>
+                <charset>UTF-8</charset>
+                <!--格式化输出：%d表示日期，%thread表示线程名，%-5level：级别从左显示5个字符宽度%msg：日志消息，%n是换行符-->
+                <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%X{traceId},%X{spanId}] [%thread] %-5level %logger{50} - %msg%n
+                </pattern>
+            </encoder>
+
+            <!--过滤器，只有过滤到指定级别的日志信息才会输出，如果level为ERROR，那么控制台只会输出ERROR日志-->
+            <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+                <level>INFO</level>
+            </filter>
+        </appender>
+
+        <!-- 按照每天生成日志文件 -->
+        <appender name="ERROR_APPENDER" class="ch.qos.logback.core.rolling.RollingFileAppender">
+            <!--日志名称，如果没有File 属性，那么只会使用FileNamePattern的文件路径规则
+             如果同时有<File>和<FileNamePattern>，那么当天日志是<File>，明天会自动把今天
+             的日志改名为今天的日期。即，<File> 的日志都是当天的。
+            -->
+            <file>${LOG_HOME}/error.log</file>
+            <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+                <!--日志文件输出的文件名-->
+                <FileNamePattern>${LOG_HOME}/error.%d{yyyy-MM-dd}.%i.log</FileNamePattern>
+                <MaxHistory>30</MaxHistory>
+                <!--用来指定日志文件的上限大小，那么到了这个值，就会删除旧的日志-->
+                <totalSizeCap>1GB</totalSizeCap>
+                <MaxFileSize>10MB</MaxFileSize>
+            </rollingPolicy>
+            <encoder>
+                <charset>UTF-8</charset>
+                <!--格式化输出：%d表示日期，%thread表示线程名，%-5level：级别从左显示5个字符宽度%msg：日志消息，%n是换行符-->
+                <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%X{traceId},%X{spanId}] [%thread] %-5level %logger{50} - %msg%n
+                </pattern>
+            </encoder>
+            <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+                <level>ERROR</level>
+            </filter>
+        </appender>
+
+        <!--指定最基础的日志输出级别-->
+        <root level="INFO">
+            <!--appender将会添加到这个loger-->
+            <appender-ref ref="async-console"/>
+            <appender-ref ref="INFO_APPENDER"/>
+            <appender-ref ref="ERROR_APPENDER"/>
+        </root>
+    </springProfile>
+</configuration>
