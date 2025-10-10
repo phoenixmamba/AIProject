@@ -1,10 +1,11 @@
 package com.cuijian.aimeeting.monitor;
 
+import com.cuijian.aimeeting.service.MeetingAiService;
+import com.cuijian.aimeeting.service.MeetingAiServiceFactory;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 
 import java.io.Serializable;
 
@@ -21,6 +22,5 @@ import java.io.Serializable;
 @AllArgsConstructor
 public class MonitorContext implements Serializable {
     private String userId;
-
-
+    private Long meetingId;
 }

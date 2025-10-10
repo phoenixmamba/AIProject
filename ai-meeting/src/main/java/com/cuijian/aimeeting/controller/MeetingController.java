@@ -16,7 +16,7 @@ import java.util.List;
 /**
  * @version : 1.0
  * @Author : cui_jian
- * @Description :
+ * @Description : 测试ai创建和编辑会议
  * @Date : 2025/9/26 10:52
  **/
 @RestController
@@ -35,13 +35,18 @@ public class MeetingController {
 
     @PutMapping("/{id}")
     public ResponseEntity<Meeting> updateMeeting(
+            HttpServletRequest request,
             @PathVariable Long id,
             @RequestBody String updateDescription) {
+        String userId = request.getHeader("userId");
+        MonitorContextHolder.set(MonitorContext.builder().userId(userId).meetingId(id).build());
         return ResponseEntity.ok(meetingService.updateMeeting(id, updateDescription));
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteMeeting(@PathVariable Long id) {
+    public ResponseEntity<Void> deleteMeeting(HttpServletRequest request, @PathVariable Long id) {
+        String userId = request.getHeader("userId");
+        MonitorContextHolder.set(MonitorContext.builder().userId(userId).meetingId(id).build());
         meetingService.deleteMeeting(id);
         return ResponseEntity.noContent().build();
     }

@@ -1,5 +1,6 @@
 //package com.cuijian.aimeeting.ai.config;
 //
+//import dev.langchain4j.memory.chat.MessageWindowChatMemory;
 //import dev.langchain4j.model.openai.OpenAiChatModel;
 //import org.springframework.beans.factory.annotation.Value;
 //import org.springframework.context.annotation.Bean;
@@ -32,7 +33,6 @@
 //                .apiKey(apiKey)
 //                .modelName(modelName)
 //                .baseUrl(baseUrl)
-//                .listeners(List.of())
 //                .temperature(0.3)  // 控制生成内容的随机性
 //                .maxTokens(1024)   // 最大生成 tokens
 //                .build();
