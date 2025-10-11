@@ -16,7 +16,7 @@ import java.util.Map;
  * 小说生成控制器
  */
 @RestController
-@CrossOrigin(origins = "http://localhost:5173")
+@CrossOrigin(origins = "http://localhost:8081")
 @RequestMapping("/api/novel")
 @RequiredArgsConstructor
 public class NovelGenerateController {

@@ -1,5 +1,6 @@
 package com.cuijian.aimeeting.service;
 
+import com.cuijian.aimeeting.ai.utils.SimpleFileWriteTool;
 import com.cuijian.aimeeting.utils.SpringContextUtil;
 import dev.langchain4j.model.chat.ChatModel;
 import dev.langchain4j.model.chat.StreamingChatModel;
@@ -19,7 +20,8 @@ import java.io.File;
 public class NovelGenerateService {
     @Resource(name = "openAiChatModel")
     private ChatModel chatModel;
-
+    @Resource
+    private SimpleFileWriteTool simpleFileWriteTool;
     /**
      * 根据用户描述生成简单文件
      *
@@ -32,6 +34,7 @@ public class NovelGenerateService {
             NovelGenerateAiService novelGenerateAiService = AiServices.builder(NovelGenerateAiService.class)
                     .chatModel(chatModel)
                     .streamingChatModel(openAiStreamingChatModel)
+                    .tools(simpleFileWriteTool)
                     .build();
             // 调用AI生成文件
             Flux<String> response = novelGenerateAiService.generateSimpleFiles(description);
