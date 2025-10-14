@@ -4,9 +4,6 @@ import com.cuijian.aimeeting.entity.AiSessionHistory;
 import com.cuijian.aimeeting.entity.Meeting;
 import dev.langchain4j.data.message.ChatMessage;
 import dev.langchain4j.memory.chat.MessageWindowChatMemory;
-import dev.langchain4j.model.chat.ChatModel;
-import dev.langchain4j.service.AiServices;
-import jakarta.annotation.Resource;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -21,7 +18,7 @@ import java.util.stream.Collectors;
  **/
 @Service
 @RequiredArgsConstructor
-public class AiParsingService {
+public class MeetingParsingService {
     
     private final MeetingAiServiceFactory meetingAiServiceFactory;
     
@@ -93,94 +90,12 @@ public class AiParsingService {
         // 直接获取更新后的会议信息
         return meetingAiService.updateMeeting(updateDescription);
     }
-    
-    /**
-     * 为已创建的会议注册AI服务实例
-     * 
-     * @param userId 用户ID
-     * @param meetingId 会议ID
-     * @param service AI服务实例
-     * @param chatMemory 对应的ChatMemory
-     */
-    public void registerMeetingService(String userId, Long meetingId, MeetingAiService service, MessageWindowChatMemory chatMemory) {
-        meetingAiServiceFactory.registerNewMeetingService(userId, meetingId, service, chatMemory);
-    }
 
-    /**
-     * 基于会话历史解析用户描述生成会议信息
-     */
-    public Meeting parseMeetingDescriptionWithHistory(String userId, List<AiSessionHistory> history, String description) {
-        // 为新会议创建新的AI服务实例，传入userId和null作为meetingId（因为是新会议）
-        MeetingAiServiceFactory.NewServiceInstance newInstance = meetingAiServiceFactory.createNewServiceInstance(userId, null);
-        MeetingAiService meetingAiService = newInstance.getService();
-        
-        // 将新创建的实例保存到ThreadLocal中，供后续注册使用
-        tempServiceInstance.set(newInstance);
-        
-        // 将历史记录转换为文本格式
-        String historyText = formatHistory(history);
-        
-        Meeting meeting = meetingAiService.parseMeetingWithHistory(historyText, description);
-        
-        // 调试：打印ChatMemory内容
-        if (DEBUG_CHAT_MEMORY) {
-            printChatMemoryContents(newInstance.getChatMemory(), "parseMeetingDescriptionWithHistory");
-        }
-        
-        return meeting;
-    }
 
-    /**
-     * 生成会议更新指令
-     */
-    public String generateUpdateInstructions(String userId, Long meetingId, String originalMeeting, String updateDescription) {
-        MeetingAiService meetingAiService = meetingAiServiceFactory.getMeetingAiService(userId, meetingId);
-        if (meetingAiService == null) {
-            // 如果没有找到缓存的服务实例，则创建新的（这次会加载历史记录）
-            MeetingAiServiceFactory.NewServiceInstance newInstance = meetingAiServiceFactory.createNewServiceInstance(userId, meetingId);
-            meetingAiService = newInstance.getService();
-            // 注册到工厂中
-            meetingAiServiceFactory.registerNewMeetingService(userId, meetingId, meetingAiService, newInstance.getChatMemory());
-            
-            // 调试：打印ChatMemory内容
-            if (DEBUG_CHAT_MEMORY) {
-                printChatMemoryContents(newInstance.getChatMemory(), "generateUpdateInstructions - 新实例");
-            }
-        } else {
-            // 调试：打印ChatMemory内容
-            if (DEBUG_CHAT_MEMORY) {
-                System.out.println("generateUpdateInstructions - 使用现有实例，会议ID: " + meetingId);
-            }
-        }
-        return meetingAiService.generateUpdateInstruction(updateDescription);
-    }
 
-    /**
-     * 基于会话历史生成会议更新指令
-     */
-    public String generateUpdateInstructionsWithHistory(String userId, Long meetingId, String originalMeeting, 
-                                                       List<AiSessionHistory> history, String updateDescription) {
-        MeetingAiService meetingAiService = meetingAiServiceFactory.getMeetingAiService(userId, meetingId);
-        if (meetingAiService == null) {
-            // 如果没有找到缓存的服务实例，则创建新的（这次会加载历史记录）
-            MeetingAiServiceFactory.NewServiceInstance newInstance = meetingAiServiceFactory.createNewServiceInstance(userId, meetingId);
-            meetingAiService = newInstance.getService();
-            // 注册到工厂中
-            meetingAiServiceFactory.registerNewMeetingService(userId, meetingId, meetingAiService, newInstance.getChatMemory());
-            
-            // 调试：打印ChatMemory内容
-            if (DEBUG_CHAT_MEMORY) {
-                printChatMemoryContents(newInstance.getChatMemory(), "generateUpdateInstructionsWithHistory - 新实例");
-            }
-        } else {
-            // 调试：打印ChatMemory内容
-            if (DEBUG_CHAT_MEMORY) {
-                System.out.println("generateUpdateInstructionsWithHistory - 使用现有实例，会议ID: " + meetingId);
-            }
-        }
-        
-        return meetingAiService.generateUpdateInstructionWithHistory(updateDescription);
-    }
+
+
+
 
     /**
      * 确认删除操作
@@ -207,19 +122,7 @@ public class AiParsingService {
         return meetingAiService.confirmDeletion("是否要删除会议：" + meetingTitle);
     }
     
-    /**
-     * 将历史记录格式化为文本
-     */
-    private String formatHistory(List<AiSessionHistory> history) {
-        if (history == null || history.isEmpty()) {
-            return "无历史记录";
-        }
-        
-        return history.stream()
-                .map(h -> "用户: " + h.getUserMessage() + "\nAI: " + h.getAiResponse())
-                .collect(Collectors.joining("\n---\n"));
-    }
-    
+
     /**
      * 清除指定用户和会议的缓存
      */
@@ -227,12 +130,7 @@ public class AiParsingService {
         meetingAiServiceFactory.clearCache(userId, meetingId);
     }
     
-    /**
-     * 清除指定用户的所有缓存
-     */
-    public void clearUserCache(String userId) {
-        meetingAiServiceFactory.clearUserCache(userId);
-    }
+
     
     /**
      * 打印ChatMemory中的内容

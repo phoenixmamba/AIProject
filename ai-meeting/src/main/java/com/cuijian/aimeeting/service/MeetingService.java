@@ -1,7 +1,6 @@
 package com.cuijian.aimeeting.service;
 
 import com.cuijian.aimeeting.mapper.MeetingMapper;
-import com.cuijian.aimeeting.entity.AiSessionHistory;
 import com.cuijian.aimeeting.entity.Meeting;
 import com.cuijian.aimeeting.entity.table.MeetingTableDef;
 import com.cuijian.aimeeting.monitor.MonitorContextHolder;
@@ -24,8 +23,8 @@ import java.util.List;
 public class MeetingService {
 
     private final MeetingMapper meetingMapper;
-    private final AiParsingService aiParsingService;
-    private final AiSessionHistoryService aiSessionHistoryService;
+    private final MeetingParsingService meetingParsingService;
+    private final MeetingSessionHistoryService meetingSessionHistoryService;
     private static final DateTimeFormatter TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
     public Meeting createMeetingByDescription(String description) {
@@ -35,7 +34,7 @@ public class MeetingService {
         String currentTime = "【当前时间】：" + LocalDateTime.now().format(TIME_FORMATTER);
         String fullContext = currentTime + "\n【会议描述】：" + description;
         
-        Meeting meeting = aiParsingService.parseMeetingDescription(userId, fullContext);
+        Meeting meeting = meetingParsingService.parseMeetingDescription(userId, fullContext);
         
         meetingMapper.insert(meeting);  // MyBatis-Flex的插入方法
         
@@ -43,10 +42,10 @@ public class MeetingService {
         MonitorContextHolder.get().setMeetingId(meeting.getId());
         
         // 在获取到会议ID后，将AI服务实例注册到工厂中
-        aiParsingService.registerMeetingServiceWithId(userId, meeting.getId());
+        meetingParsingService.registerMeetingServiceWithId(userId, meeting.getId());
         
         // 保存会话历史记录
-        aiSessionHistoryService.saveSessionHistory(meeting.getId(), userId, description, 
+        meetingSessionHistoryService.saveSessionHistory(meeting.getId(), userId, description,
                 meeting.toString(), "CREATE");
         
         return meeting;
@@ -65,13 +64,13 @@ public class MeetingService {
         String updateInstructions = currentTime + "\n【更新描述】：" + updateDescription;
 
         // 直接获取更新后的会议信息，避免二次调用
-        Meeting updated = aiParsingService.updateMeetingDescription(userId, id, existing, updateInstructions);
+        Meeting updated = meetingParsingService.updateMeetingDescription(userId, id, existing, updateInstructions);
         
         updated.setId(id);
         meetingMapper.update(updated);  // MyBatis-Flex的更新方法
         
         // 保存会话历史记录
-        aiSessionHistoryService.saveSessionHistory(id, userId, updateDescription, 
+        meetingSessionHistoryService.saveSessionHistory(id, userId, updateDescription,
                 updated.toString(), "UPDATE");
         
         return updated;
@@ -85,15 +84,15 @@ public class MeetingService {
         }
 
         // AI确认删除意图
-        String confirmation = aiParsingService.confirmDeletion(userId, id, meeting.getTitle());
+        String confirmation = meetingParsingService.confirmDeletion(userId, id, meeting.getTitle());
         if (confirmation.contains("确认") || confirmation.contains("是")) {
             meetingMapper.deleteById(id);  // MyBatis-Flex的删除方法
             
             // 删除会话历史记录
-            aiSessionHistoryService.deleteSessionHistoryByMeetingId(id);
+            meetingSessionHistoryService.deleteSessionHistoryByMeetingId(id);
             
             // 清除缓存
-            aiParsingService.clearCache(userId, id);
+            meetingParsingService.clearCache(userId, id);
         } else {
             throw new RuntimeException("AI确认删除失败: " + confirmation);
         }

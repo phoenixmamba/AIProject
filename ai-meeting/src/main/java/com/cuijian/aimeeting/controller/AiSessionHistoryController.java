@@ -1,7 +1,7 @@
 package com.cuijian.aimeeting.controller;
 
 import com.cuijian.aimeeting.entity.AiSessionHistory;
-import com.cuijian.aimeeting.service.AiSessionHistoryService;
+import com.cuijian.aimeeting.service.MeetingSessionHistoryService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -17,7 +17,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class AiSessionHistoryController {
     
-    private final AiSessionHistoryService aiSessionHistoryService;
+    private final MeetingSessionHistoryService meetingSessionHistoryService;
     
     /**
      * 根据会议ID获取会话历史记录
@@ -27,7 +27,7 @@ public class AiSessionHistoryController {
      */
     @GetMapping("/meeting/{meetingId}")
     public ResponseEntity<List<AiSessionHistory>> getSessionHistoryByMeetingId(@PathVariable Long meetingId) {
-        List<AiSessionHistory> historyList = aiSessionHistoryService.getSessionHistoryByMeetingId(meetingId);
+        List<AiSessionHistory> historyList = meetingSessionHistoryService.getSessionHistoryByMeetingId(meetingId);
         return ResponseEntity.ok(historyList);
     }
     
@@ -39,7 +39,7 @@ public class AiSessionHistoryController {
      */
     @GetMapping("/user/{userId}")
     public ResponseEntity<List<AiSessionHistory>> getSessionHistoryByUserId(@PathVariable String userId) {
-        List<AiSessionHistory> historyList = aiSessionHistoryService.getSessionHistoryByUserId(userId);
+        List<AiSessionHistory> historyList = meetingSessionHistoryService.getSessionHistoryByUserId(userId);
         return ResponseEntity.ok(historyList);
     }
 }

@@ -18,7 +18,7 @@ import static com.cuijian.aimeeting.entity.table.AiSessionHistoryTableDef.AI_SES
  */
 @Service
 @RequiredArgsConstructor
-public class AiSessionHistoryService {
+public class MeetingSessionHistoryService {
     
     private final AiSessionHistoryMapper aiSessionHistoryMapper;
     

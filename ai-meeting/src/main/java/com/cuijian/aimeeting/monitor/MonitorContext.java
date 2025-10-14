@@ -22,5 +22,6 @@ import java.io.Serializable;
 @AllArgsConstructor
 public class MonitorContext implements Serializable {
     private String userId;
+    private String appId;
     private Long meetingId;
 }
