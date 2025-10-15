@@ -6,6 +6,8 @@ document.addEventListener('DOMContentLoaded', function() {
     // 切换移动端菜单显示/隐藏
     hamburger.addEventListener('click', function() {
         navMenu.classList.toggle('active');
+        // 汉堡菜单动画
+        hamburger.classList.toggle('active');
     });
     
     // 平滑滚动到锚点
@@ -21,6 +23,7 @@ document.addEventListener('DOMContentLoaded', function() {
             if (targetSection) {
                 // 关闭移动端菜单（如果打开）
                 navMenu.classList.remove('active');
+                hamburger.classList.remove('active');
                 
                 // 平滑滚动到目标区域
                 window.scrollTo({
@@ -64,6 +67,18 @@ document.addEventListener('DOMContentLoaded', function() {
                 top: aboutSection.offsetTop - 80,
                 behavior: 'smooth'
             });
+        }
+    });
+    
+    // 添加滚动效果
+    window.addEventListener('scroll', function() {
+        const navbar = document.querySelector('.navbar');
+        if (window.scrollY > 100) {
+            navbar.style.backgroundColor = 'rgba(255, 255, 255, 0.95)';
+            navbar.style.backdropFilter = 'blur(10px)';
+        } else {
+            navbar.style.backgroundColor = '#fff';
+            navbar.style.backdropFilter = 'none';
         }
     });
 });

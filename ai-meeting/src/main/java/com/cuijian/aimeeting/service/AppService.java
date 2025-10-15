@@ -10,12 +10,18 @@ import com.cuijian.aimeeting.monitor.MonitorContext;
 import com.cuijian.aimeeting.monitor.MonitorContextHolder;
 import com.cuijian.aimeeting.parser.CodeParserExecutor;
 import com.cuijian.aimeeting.saver.CodeFileSaverExecutor;
+import com.mybatisflex.core.paginate.Page;
+import com.mybatisflex.core.query.QueryWrapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 
 import java.io.File;
+import java.time.LocalDateTime;
+
+import static com.cuijian.aimeeting.entity.table.ChatHistoryTableDef.CHAT_HISTORY;
+import static com.cuijian.aimeeting.entity.table.InfoTableDef.INFO;
 
 /**
  * @version : 1.0
@@ -112,6 +118,80 @@ public class AppService {
             throw new IllegalArgumentException("应用ID不能为空");
         }
         return appInfoMapper.selectOneById(id);
+    }
+
+    /**
+     * 分页查询某个应用的对话历史（游标查询）
+     *
+     * @param appId            应用ID
+     * @param userId           用户ID
+     * @param pageSize         页面大小
+     * @param lastCreateTime   最后一条记录的创建时间
+     * @return 对话历史分页
+     */
+    public Page<AppChatHistory> listAppChatHistory(String appId, String userId, int pageSize, LocalDateTime lastCreateTime) {
+        // 参数校验
+        if (StrUtil.isBlank(appId)) {
+            throw new IllegalArgumentException("应用ID不能为空");
+        }
+        if (pageSize <= 0 || pageSize > 100) {
+            throw new IllegalArgumentException("页面大小必须在1-100之间");
+        }
+        
+        // 构建查询条件
+        QueryWrapper queryWrapper = QueryWrapper.create()
+                .select()
+                .from(CHAT_HISTORY)
+                .where(CHAT_HISTORY.APP_ID.eq(appId))
+//                .and(CHAT_HISTORY.USER_ID.eq(userId))
+                .and(CHAT_HISTORY.IS_DELETE.eq(0))
+                .orderBy(CHAT_HISTORY.CREATE_TIME, false);
+        
+        // 如果有游标，则查询大于该游标的数据
+        if (lastCreateTime != null) {
+            queryWrapper.and(CHAT_HISTORY.CREATE_TIME.gt(lastCreateTime));
+        }
+        
+        // 创建分页对象
+        Page<AppChatHistory> page = new Page<>(1, pageSize);
+        
+        // 执行分页查询
+        return chatHistoryMapper.paginate(page, queryWrapper);
+    }
+
+    /**
+     * 分页获取当前用户创建的应用列表
+     *
+     * @param userId   用户ID
+     * @param pageNum  页码
+     * @param pageSize 页面大小
+     * @return 应用列表分页
+     */
+    public Page<AppInfo> listMyAppVOByPage(String userId, int pageNum, int pageSize) {
+        // 参数校验
+        if (StrUtil.isBlank(userId)) {
+            throw new IllegalArgumentException("用户ID不能为空");
+        }
+        if (pageNum <= 0) {
+            throw new IllegalArgumentException("页码必须大于0");
+        }
+        if (pageSize <= 0 || pageSize > 100) {
+            throw new IllegalArgumentException("页面大小必须在1-100之间");
+        }
+
+        // 构建查询条件
+        QueryWrapper queryWrapper = QueryWrapper.create()
+                .select()
+                .from(INFO)
+                .where(INFO.USER_ID.eq(userId))
+                .and(INFO.IS_DELETE.eq(0))
+                .orderBy(INFO.CREATE_TIME, false);
+
+        // 创建分页对象
+        Page<AppInfo> page = new Page<>(pageNum, pageSize);
+
+        // 执行分页查询
+        return appInfoMapper.paginate(page, queryWrapper);
     }
 
     /**
