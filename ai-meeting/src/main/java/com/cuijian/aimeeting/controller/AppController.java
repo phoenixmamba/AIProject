@@ -3,6 +3,8 @@ package com.cuijian.aimeeting.controller;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONUtil;
 import com.cuijian.aimeeting.common.BaseResponse;
+import com.cuijian.aimeeting.common.ErrorCode;
+import com.cuijian.aimeeting.common.ThrowUtils;
 import com.cuijian.aimeeting.constant.AppConstant;
 import com.cuijian.aimeeting.entity.AppChatHistory;
 import com.cuijian.aimeeting.entity.AppInfo;
@@ -10,9 +12,11 @@ import com.cuijian.aimeeting.entity.Meeting;
 import com.cuijian.aimeeting.monitor.MonitorContext;
 import com.cuijian.aimeeting.monitor.MonitorContextHolder;
 import com.cuijian.aimeeting.service.AppService;
+import com.cuijian.aimeeting.service.ProjectDownloadService;
 import com.mybatisflex.core.paginate.Page;
 import com.mybatisflex.core.query.QueryWrapper;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.FileSystemResource;
@@ -44,6 +48,8 @@ import java.util.Map;
 public class AppController {
 
     private final AppService appService;
+
+    private final ProjectDownloadService projectDownloadService;
 
     @PostMapping("/createApp")
     public ResponseEntity<String> createApp(@RequestBody CreateAppRequest request, HttpServletRequest httpServletRequest) {
@@ -228,6 +234,34 @@ public class AppController {
         if (filePath.endsWith(".jpg")) return "image/jpeg";
         return "application/octet-stream";
     }
+
+    /**
+     * 下载应用代码
+     *
+     * @param appId    应用ID
+     * @param request  请求
+     * @param response 响应
+     */
+    @GetMapping("/download/{appId}")
+    public void downloadAppCode(@PathVariable String appId,
+                                HttpServletRequest request,
+                                HttpServletResponse response) {
+        //  基础校验
+        ThrowUtils.throwIf(StrUtil.isBlank(appId), ErrorCode.PARAMS_ERROR, "应用ID不能为空");
+        //  查询应用信息
+        AppInfo appInfo = appService.getAppInfoById(appId);
+        ThrowUtils.throwIf(appInfo == null, ErrorCode.NOT_FOUND_ERROR, "应用不存在");
+        //  构建应用代码目录路径（生成目录，非部署目录）
+        String sourceDirPath = AppConstant.CODE_OUTPUT_ROOT_DIR + File.separator + appId;
+        //  检查代码目录是否存在
+        File sourceDir = new File(sourceDirPath);
+        ThrowUtils.throwIf(!sourceDir.exists(), ErrorCode.NOT_FOUND_ERROR, "应用代码不存在");
+        //  生成下载文件名（不建议添加中文内容）
+        String downloadFileName = String.valueOf(appId);
+        // 7. 调用通用下载服务
+        projectDownloadService.downloadProjectAsZip(sourceDirPath, downloadFileName, response);
+    }
+
 
     public static void main(String[] args) {
         String str="http://localhost:8001/ai-meeting/api/app/static/1/style.css";
