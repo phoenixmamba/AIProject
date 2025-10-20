@@ -19,6 +19,7 @@ import reactor.core.publisher.Flux;
 
 import java.io.File;
 import java.time.LocalDateTime;
+import java.util.List;
 
 import static com.cuijian.aimeeting.entity.table.ChatHistoryTableDef.CHAT_HISTORY;
 import static com.cuijian.aimeeting.entity.table.InfoTableDef.INFO;
@@ -192,6 +193,30 @@ public class AppService {
 
         // 执行分页查询
         return appInfoMapper.paginate(page, queryWrapper);
+    }
+
+    /**
+     * 根据用户ID获取应用列表
+     *
+     * @param userId 用户ID
+     * @return 应用列表
+     */
+    public List<AppInfo> listAppsByUserId(String userId) {
+        // 参数校验
+        if (StrUtil.isBlank(userId)) {
+            throw new IllegalArgumentException("用户ID不能为空");
+        }
+
+        // 构建查询条件
+        QueryWrapper queryWrapper = QueryWrapper.create()
+                .select()
+                .from(INFO)
+                .where(INFO.USER_ID.eq(userId))
+                .and(INFO.IS_DELETE.eq(0))
+                .orderBy(INFO.CREATE_TIME, false);
+
+        // 执行查询
+        return appInfoMapper.selectListByQuery(queryWrapper);
     }
 
     /**

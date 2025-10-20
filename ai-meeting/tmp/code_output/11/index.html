@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>进制转换器 - 科技工具</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- 网格背景 -->
+    <div class="grid-background"></div>
+    
+    <!-- 导航栏 -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <h1 class="logo">进制转换器</h1>
+            <div class="nav-links">
+                <a href="#converter" class="nav-link">转换工具</a>
+                <a href="#about" class="nav-link">关于</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 主要内容区域 -->
+    <main class="main-content">
+        <!-- 工具区域 -->
+        <section id="converter" class="converter-section">
+            <div class="container">
+                <h2 class="section-title">进制转换工具</h2>
+                <p class="section-description">在二进制、八进制、十进制和十六进制之间快速转换数值</p>
+                
+                <div class="converter-card">
+                    <div class="input-group">
+                        <label for="inputValue">输入数值：</label>
+                        <input type="text" id="inputValue" placeholder="请输入要转换的数值" class="tech-input">
+                    </div>
+                    
+                    <div class="input-group">
+                        <label for="fromBase">从进制：</label>
+                        <select id="fromBase" class="tech-select">
+                            <option value="2">二进制 (2)</option>
+                            <option value="8">八进制 (8)</option>
+                            <option value="10" selected>十进制 (10)</option>
+                            <option value="16">十六进制 (16)</option>
+                        </select>
+                    </div>
+                    
+                    <div class="input-group">
+                        <label for="toBase">转换到：</label>
+                        <select id="toBase" class="tech-select">
+                            <option value="2">二进制 (2)</option>
+                            <option value="8">八进制 (8)</option>
+                            <option value="10">十进制 (10)</option>
+                            <option value="16" selected>十六进制 (16)</option>
+                        </select>
+                    </div>
+                    
+                    <button id="convertBtn" class="tech-button">转换</button>
+                    
+                    <div class="result-group">
+                        <label>转换结果：</label>
+                        <div id="result" class="result-display">等待输入...</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 关于区域 -->
+        <section id="about" class="about-section">
+            <div class="container">
+                <h2 class="section-title">关于本工具</h2>
+                <div class="about-content">
+                    <p>这是一个专业的进制转换工具，支持二进制、八进制、十进制和十六进制之间的相互转换。</p>
+                    <p>采用先进的算法实现快速准确的转换，界面设计遵循科技美学原则，提供流畅的用户体验。</p>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- 页脚 -->
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; 2024 进制转换器 - 科技工具平台</p>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>

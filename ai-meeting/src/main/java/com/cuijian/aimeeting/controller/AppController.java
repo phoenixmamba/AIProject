@@ -169,6 +169,24 @@ public class AppController {
         
         return new BaseResponse<>(0, page, "获取成功");
     }
+
+    /**
+     * 根据用户ID获取应用列表
+     *
+     * @param request 请求
+     * @return 应用列表
+     */
+    @GetMapping("/list/byUserId")
+    public BaseResponse<List<AppInfo>> listAppsByUserId(HttpServletRequest request) {
+        // 获取当前登录用户
+        String userId = request.getHeader("userId") == null ? "admin" : request.getHeader("userId");
+        
+        // 调用服务查询应用列表
+        List<AppInfo> appList = appService.listAppsByUserId(userId);
+        
+        return new BaseResponse<>(0, appList, "获取成功");
+    }
+
     @Data
     public static class CreateAppRequest {
         private String appName;

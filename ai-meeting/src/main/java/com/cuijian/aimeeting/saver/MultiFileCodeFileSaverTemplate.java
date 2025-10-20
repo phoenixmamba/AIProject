@@ -6,7 +6,6 @@ import com.cuijian.aimeeting.ai.model.MultiFileCodeResult;
 /**
  * 多文件代码保存器
  *
- * @author yupi
  */
 public class MultiFileCodeFileSaverTemplate extends CodeFileSaverTemplate<MultiFileCodeResult> {
 
