@@ -1,6 +1,7 @@
 package com.cuijian.aimeeting.ai.utils;
 
 import cn.hutool.json.JSONObject;
+import com.cuijian.aimeeting.ai.tools.BaseTool;
 import dev.langchain4j.agent.tool.P;
 import dev.langchain4j.agent.tool.Tool;
 import dev.langchain4j.agent.tool.ToolMemoryId;

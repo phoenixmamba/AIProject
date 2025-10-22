@@ -7,7 +7,7 @@ import dev.langchain4j.model.output.structured.Description;
 import lombok.Data;
 
 @Data
-public abstract class McpBaseTool {
+public abstract class BaseTool {
 
     @Description("工具的英文名称，用于代码中引用")
     private String toolName;

@@ -1,15 +1,15 @@
 package com.cuijian.aimeeting.ai;
 
-import com.cuijian.aimeeting.entity.AiSessionHistory;
+import com.cuijian.aimeeting.ai.tools.BaseTool;
+import com.cuijian.aimeeting.ai.tools.ToolManager;
 import com.cuijian.aimeeting.entity.AppChatHistory;
 import com.cuijian.aimeeting.service.AppCodeGenerateService;
-import com.cuijian.aimeeting.service.MeetingAiServiceFactory;
+import com.cuijian.aimeeting.service.McpTestAiService;
 import com.cuijian.aimeeting.utils.SpringContextUtil;
 import dev.langchain4j.data.message.AiMessage;
 import dev.langchain4j.data.message.ChatMessage;
 import dev.langchain4j.data.message.UserMessage;
 import dev.langchain4j.memory.chat.MessageWindowChatMemory;
-import dev.langchain4j.model.chat.ChatModel;
 import dev.langchain4j.model.chat.StreamingChatModel;
 import dev.langchain4j.model.openai.OpenAiChatModel;
 import dev.langchain4j.service.AiServices;
@@ -30,12 +30,16 @@ public class AppAiServiceFactory {
     @Autowired
     private OpenAiChatModel openAiChatModel;
     
+//    @Autowired
+//    private StreamingChatModel streamingChatModel;
+    
     @Autowired
     private AppChatHistoryService appChatHistoryService;
     
     // 使用ConcurrentHashMap确保线程安全
     private final ConcurrentHashMap<String, AppCodeGenerateService> serviceCache = new ConcurrentHashMap<>();
     private final ConcurrentHashMap<String, MessageWindowChatMemory> memoryCache = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<String, McpTestAiService> mcpTestServiceCache = new ConcurrentHashMap<>();
     
     // 控制是否打印ChatMemory内容的开关
     private static final boolean DEBUG_CHAT_MEMORY = true;
@@ -178,6 +182,39 @@ public class AppAiServiceFactory {
             System.err.println("加载历史会话记录时出错: " + e.getMessage());
             e.printStackTrace();
         }
+    }
+    
+    /**
+     * 获取或创建MCP测试AI服务实例
+     * 
+     * @param userId 用户ID
+     * @param testId 测试ID
+     * @return McpTestAiService实例
+     */
+    public McpTestAiService getMcpTestAiService(String userId, String testId) {
+        String key = buildCacheKey(userId, testId);
+        McpTestAiService service = mcpTestServiceCache.get(key);
+        
+        if (service == null) {
+            // 创建新的服务实例
+            MessageWindowChatMemory chatMemory = MessageWindowChatMemory.withMaxMessages(20);
+            
+            // 使用工具管理器获取所有已注册的工具
+            ToolManager toolManager = SpringContextUtil.getBean(ToolManager.class);
+            BaseTool[] tools = toolManager.getAllTools();
+            StreamingChatModel openAiStreamingChatModel = SpringContextUtil.getBean("streamingChatModelPrototype", StreamingChatModel.class);
+
+            service = AiServices.builder(McpTestAiService.class)
+                    .chatModel(openAiChatModel)
+                    .streamingChatModel(openAiStreamingChatModel)
+                    .chatMemory(chatMemory)
+                    .tools(tools)
+                    .build();
+            
+            mcpTestServiceCache.put(key, service);
+        }
+        
+        return service;
     }
     
     /**
